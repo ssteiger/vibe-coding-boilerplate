@@ -1,0 +1,23 @@
+{
+	"name": "@vibe-coding-boilerplate/db-drizzle",
+	"module": "src/index.ts",
+	"types": "src/index.ts",
+	"type": "module",
+	"scripts": {
+		"introspect": "npx drizzle-kit introspect:pg"
+	},
+	"dependencies": {
+		"@sinclair/typebox": "^0.34.9",
+		"drizzle-orm": "^0.39.3",
+		"drizzle-typebox": "^0.1.1",
+		"postgres": "^3.4.5",
+		"supabase": "^2.19.7"
+	},
+	"devDependencies": {
+		"drizzle-kit": "^0.28.0",
+		"tsx": "^4.19.3"
+	},
+	"peerDependencies": {
+		"typescript": "^5.8.2"
+	}
+}

@@ -1,0 +1,11 @@
+{
+	"name": "@vibe-coding-boilerplate/supabase",
+	"scripts": {
+		"start": "supabase status || supabase start",
+		"reset": "supabase db reset || supabase start",
+		"test": "supabase db test",
+		"lint": "supabase db lint",
+		"gen:types": "supabase gen types typescript --local > ../web/src/types/supabase.ts && cp ../web/src/types/supabase.ts ../my-app/src/types/supabase.ts",
+		"deploy": "supabase link --project-ref $SUPABASE_PROJECT_REF && supabase db push"
+	}
+}

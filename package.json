@@ -1,0 +1,26 @@
+{
+	"name": "vibe-coding-boilerplate",
+	"description": "A starting point for vibe coding projects",
+	"version": "0.1.0",
+	"authors": ["Soeren Steiger <soeren@memberr.de>"],
+	"private": true,
+	"packageManager": "npm@10.8.2",
+	"workspaces": ["apps/*", "packages/*"],
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/ssteiger/vibe-coding-boilerplate"
+	},
+	"scripts": {
+		"build": "turbo run build",
+		"dev": "turbo run dev --parallel",
+		"dev:db": "cd apps/supabase && npx supabase start",
+		"dev:my-app": "turbo run dev --filter=@vibe-coding-boilerplate/my-app",
+		"dev:web": "turbo run dev --filter=@vibe-coding-boilerplate/web",
+		"gen:types": "cd apps/supabase && npm run gen:types",
+		"env:check": "node scripts.js env:check"
+	},
+	"devDependencies": {
+		"supabase": "^2.20.5",
+		"turbo": "^2.4.4"
+	}
+}
