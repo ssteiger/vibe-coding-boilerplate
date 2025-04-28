@@ -2,6 +2,9 @@
 
 A boilerplate to quickly start vibe coding.
 
+SQL data queries and the frontend component that consumes the data are located in the same file.
+This together with end-to-end type safety makes this setup ideal for vibe coding.
+
 ## Local development
 
 ```bash
