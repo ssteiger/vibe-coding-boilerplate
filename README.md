@@ -39,7 +39,7 @@ npm run dev:my-app
 ```
 
 ```bash
-# run local web app
+# run web app
 npm run dev:web
 
 # open web app at http://127.0.0.1:3000
