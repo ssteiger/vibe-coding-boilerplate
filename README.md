@@ -1,4 +1,4 @@
-# Vibe Coding Boilerplage
+# Vibe Coding Boilerplate
 
 A boilerplate to quickly start vibe coding.
 
