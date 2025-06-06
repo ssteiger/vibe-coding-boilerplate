@@ -5,7 +5,6 @@ const Home = () => {
   const navigate = useNavigate()
   // redirect to home
   navigate({ to: '/home' })
-  // return null
   return null
 }
 
