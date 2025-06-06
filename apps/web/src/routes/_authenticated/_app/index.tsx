@@ -1,14 +1,14 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { useNavigate } from '@tanstack/react-router'
 
 const Home = () => {
+  const navigate = useNavigate()
+  // redirect to home
+  navigate({ to: '/home' })
+  // return null
   return null
 }
 
 export const Route = createFileRoute('/_authenticated/_app/')({
   component: Home,
-  loader: ({ context, navigate }) => {
-    // Redirect to dashboard
-    navigate({ to: '/home' })
-    return { user: context.user }
-  },
 })
