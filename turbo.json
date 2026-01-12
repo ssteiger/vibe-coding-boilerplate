@@ -1,32 +1,32 @@
 {
-	"$schema": "https://turbo.build/schema.json",
-	"tasks": {
-		"build": {
-			"dependsOn": ["^build"],
-			"outputs": [".next/**", "!.next/cache/**"]
-		},
-		"dev:db": {
-			"cache": false
-		},
-		"gen:types": {
-			"dependsOn": ["dev:db"],
-			"cache": false
-		},
-		"dev:web": {
-			"dependsOn": ["dev:db"],
-			"cache": false
-		},
-		"dev:my-app": {
-			"dependsOn": ["dev:db"],
-			"cache": false
-		},
-		"dev": {
-			"dependsOn": ["env:check", "dev:db", "gen:types", "dev:web", "dev:my-app"],
-			"cache": false
-		},
-		"env:check": {
-			"cache": false,
-			"persistent": false
-		}
-	}
+  "$schema": "https://turbo.build/schema.json",
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": [".next/**", "!.next/cache/**"]
+    },
+    "dev:db": {
+      "cache": false
+    },
+    "gen:types": {
+      "dependsOn": ["dev:db"],
+      "cache": false
+    },
+    "dev:web": {
+    "dependsOn": ["dev:db"],
+      "cache": false
+    },
+    "dev:my-app": {
+      "dependsOn": ["dev:db"],
+      "cache": false
+    },
+    "dev": {
+      "dependsOn": ["env:check", "dev:db", "gen:types", "dev:web", "dev:my-app"],
+      "cache": false
+    },
+    "env:check": {
+      "cache": false,
+      "persistent": false
+    }
+  }
 }
