@@ -24,6 +24,14 @@ turbo dev
 # copy the SUPABASE_ANON_KEY from the console into apps/web/.env and apps/my-app/.env
 ```
 
+### Database
+
+```bash
+# prepare database
+cd apps/supabase
+supabase migration up
+```
+
 ### Start single Services
 
 ```bash
