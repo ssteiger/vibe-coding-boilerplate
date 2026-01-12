@@ -77,7 +77,9 @@ export function UserAuthFormLogin({ className, ...props }: UserAuthFormProps) {
 
   // Email magic link login mutation
   const loginMutation = useMutation({
-    mutationFn: loginFn,
+    mutationFn: async (variables: { email: string }) => {
+      return await loginFn({ data: variables })
+    },
     onSuccess: () => {
       setIsEmailSent(true)
       toast.success('Login verification code sent to your email')
@@ -89,7 +91,9 @@ export function UserAuthFormLogin({ className, ...props }: UserAuthFormProps) {
 
   // Verification code login mutation
   const verifyCodeMutation = useMutation({
-    mutationFn: verifyCodeFn,
+    mutationFn: async (variables: { email: string; code: string }) => {
+      return await verifyCodeFn({ data: variables })
+    },
     onSuccess: () => {
       toast.success('Login successful')
       // Redirect the user after successful verification
@@ -103,7 +107,9 @@ export function UserAuthFormLogin({ className, ...props }: UserAuthFormProps) {
 
   // OAuth login mutation
   const oauthMutation = useMutation({
-    mutationFn: oauthFn,
+    mutationFn: async (variables: { provider: 'github' }) => {
+      return await oauthFn({ data: variables })
+    },
     onSuccess: () => {
       toast.success('Login successful')
       // Redirect the user after successful verification
@@ -128,12 +134,12 @@ export function UserAuthFormLogin({ className, ...props }: UserAuthFormProps) {
 
   async function onSubmit(event: React.SyntheticEvent) {
     event.preventDefault()
-    loginMutation.mutate({ data: { email } })
+    loginMutation.mutate({ email })
   }
 
   async function onVerifyCode(event: React.SyntheticEvent) {
     event.preventDefault()
-    verifyCodeMutation.mutate({ data: { email, code: verificationCode } })
+    verifyCodeMutation.mutate({ email, code: verificationCode })
   }
 
   return (
@@ -221,7 +227,7 @@ export function UserAuthFormLogin({ className, ...props }: UserAuthFormProps) {
             variant="outline"
             type="button"
             disabled={isLoading}
-            onClick={() => oauthMutation.mutate('github')}
+            onClick={() => oauthMutation.mutate({ provider: 'github' })}
           >
             {oauthMutation.isPending ? (
               <LoaderCircle className="w-4 h-4 mr-2 animate-spin" />

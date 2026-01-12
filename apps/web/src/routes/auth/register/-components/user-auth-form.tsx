@@ -21,7 +21,9 @@ export function UserAuthFormRegister({ className, ...props }: UserAuthFormProps)
 
   // Email signup mutation - updated to passwordless
   const emailSignup = useMutation({
-    mutationFn: loginFn,
+    mutationFn: async (variables: { email: string }) => {
+      return await loginFn({ data: variables })
+    },
     onSuccess: () => {
       setIsEmailSent(true)
       toast.success('Registration verification code sent to your email')
@@ -33,7 +35,9 @@ export function UserAuthFormRegister({ className, ...props }: UserAuthFormProps)
 
   // Verification code registration mutation
   const verifyCodeMutation = useMutation({
-    mutationFn: verifyCodeFn,
+    mutationFn: async (variables: { email: string; code: string }) => {
+      return await verifyCodeFn({ data: variables })
+    },
     onSuccess: () => {
       toast.success('Registration successful')
       // Redirect the user after successful verification
@@ -46,7 +50,9 @@ export function UserAuthFormRegister({ className, ...props }: UserAuthFormProps)
 
   // GitHub OAuth mutation
   const githubSignIn = useMutation({
-    mutationFn: oauthFn,
+    mutationFn: async (variables: { provider: 'github' }) => {
+      return await oauthFn({ data: variables })
+    },
     onError: (error) => {
       toast.error(`GitHub sign-in failed: ${error.message}`)
     },
@@ -160,7 +166,7 @@ export function UserAuthFormRegister({ className, ...props }: UserAuthFormProps)
             variant="outline"
             type="button"
             disabled={isLoading}
-            onClick={() => githubSignIn.mutate()}
+            onClick={() => githubSignIn.mutate({ provider: 'github' })}
           >
             {isLoading ? (
               <LoaderCircle className="w-4 h-4 mr-2 animate-spin" />
