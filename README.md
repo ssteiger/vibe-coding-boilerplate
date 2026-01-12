@@ -8,8 +8,10 @@ This together with end-to-end type safety makes this setup ideal for vibe coding
 ## Local development
 
 ```bash
+nvm use v20.18.0
+
 # install dependencies
-npm install
+bun install
 
 # create .env file
 cp apps/web/.env.example apps/web/.env
@@ -26,7 +28,7 @@ turbo dev
 
 ```bash
 # run local supabase server
-npm run dev:db
+bun run dev:db
 
 # copy the SUPABASE_ANON_KEY from the console into apps/web/.env and apps/my-app/.env
 
@@ -35,12 +37,12 @@ npm run dev:db
 
 ```bash
 # run app
-npm run dev:my-app
+bun run dev:my-app
 ```
 
 ```bash
 # run web app
-npm run dev:web
+bun run dev:web
 
 # open web app at http://127.0.0.1:3000
 ```
@@ -56,7 +58,7 @@ npx drizzle-kit generate
 
 ```bash
 # install turbo cli
-npm install turbo --global
+bun install turbo --global
 ```
 
 ## Packages
