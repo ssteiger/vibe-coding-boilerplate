@@ -30,7 +30,7 @@ const columns: ColumnDef<Log>[] = [
     size: 200,
     cell: ({ row }) => {
       const value = row.getValue<string | null>('created_at')
-      return value ? new Date(value).toLocaleString() : '—'
+      return value ? new Date(value).toLocaleString() : '-'
     },
   },
   {

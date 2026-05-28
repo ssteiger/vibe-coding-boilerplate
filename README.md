@@ -1,6 +1,6 @@
 # Vibe Coding Boilerplate
 
-A starting point for projects where you want to **write a feature top-to-bottom in one file** — the SQL query, the server function that runs it, and the React component that consumes it — without losing end-to-end type safety.
+A starting point for projects where you want to **write a feature top-to-bottom in one file** - the SQL query, the server function that runs it, and the React component that consumes it - without losing end-to-end type safety.
 
 The opinionated bet: small full-stack features are easier to read, change, and let an LLM iterate on when they're colocated. The tools below were picked so that "one file owns one screen" stays viable as the project grows.
 
@@ -20,8 +20,8 @@ The opinionated bet: small full-stack features are easier to read, change, and l
 
 The two opinions that drive the rest of the design:
 
-1. **Drizzle, not generated Supabase types**, is the single source of truth for table shapes. We don't run `supabase gen types` — the Drizzle schema in [packages/db-drizzle/src/schema.ts](packages/db-drizzle/src/schema.ts) is authored by hand, and SQL migrations in `apps/supabase/migrations/` are kept in sync with it.
-2. **Server functions live next to the component that uses them.** TanStack Start's `createServerFn` runs on the server but is imported and called from client code with full type inference — see the activity-logs example below.
+1. **Drizzle, not generated Supabase types**, is the single source of truth for table shapes. We don't run `supabase gen types` - the Drizzle schema in [packages/db-drizzle/src/schema.ts](packages/db-drizzle/src/schema.ts) is authored by hand, and SQL migrations in `apps/supabase/migrations/` are kept in sync with it.
+2. **Server functions live next to the component that uses them.** TanStack Start's `createServerFn` runs on the server but is imported and called from client code with full type inference - see the activity-logs example below.
 
 ---
 
@@ -100,10 +100,10 @@ If you'd rather have drizzle-kit produce the SQL for you, run `npx drizzle-kit g
 
 ### Prerequisites
 
-- **Node 20.18.0** — pinned in [.nvmrc](.nvmrc). `nvm use` will switch you.
-- **Bun ≥ 1.2** — `curl -fsSL https://bun.sh/install | bash`
-- **Supabase CLI** — `brew install supabase/tap/supabase` (the CLI is also installed as a dev dependency in this repo for the `npx supabase` invocations).
-- **Docker Desktop** running — Supabase's local stack runs in containers.
+- **Node 20.18.0** - pinned in [.nvmrc](.nvmrc). `nvm use` will switch you.
+- **Bun ≥ 1.2** - `curl -fsSL https://bun.sh/install | bash`
+- **Supabase CLI** - `brew install supabase/tap/supabase` (the CLI is also installed as a dev dependency in this repo for the `npx supabase` invocations).
+- **Docker Desktop** running - Supabase's local stack runs in containers.
 
 ### First-time setup
 
@@ -126,14 +126,14 @@ bun run dev:db
 #      - apps/my-app/.env
 #    You can re-print them any time with `cd apps/supabase && npx supabase status`.
 
-# 5. Apply migrations
-cd apps/supabase && npx supabase migration up && cd ../..
+# 5. Apply migrations (idempotent - also chained into `bun run dev`)
+bun run db:migrate
 ```
 
 ### Day-to-day
 
 ```bash
-# Everything (DB + web + my-app worker) in one go.
+# Boots Supabase, applies any new migrations, then runs both apps in parallel.
 bun run dev
 ```
 
@@ -141,6 +141,8 @@ Or run individual services:
 
 ```bash
 bun run dev:db        # Supabase stack only
+bun run db:migrate    # Apply any new migrations (no-op when already applied)
+bun run db:reset      # DESTRUCTIVE - drop the local DB and re-apply migrations
 bun run dev:web       # TanStack Start app at http://127.0.0.1:3000
 bun run dev:my-app    # tsx watcher for the standalone script
 ```
@@ -179,9 +181,11 @@ ESLint also runs on `apps/web` if you call it directly (`cd apps/web && bunx esl
 ### Adding a table
 
 1. Add the `pgTable(...)` definition to [packages/db-drizzle/src/schema.ts](packages/db-drizzle/src/schema.ts).
-2. Write the SQL in a new `apps/supabase/migrations/<timestamp>_<name>.sql`. The timestamp prefix is what Supabase orders by; copy the format of the existing migration.
-3. `cd apps/supabase && npx supabase migration up`.
-4. (Optional) `cd packages/db-drizzle && npx drizzle-kit generate` to have drizzle-kit produce the migration for you — but commit only one version.
+2. Write the SQL in a new `apps/supabase/migrations/<UTC-timestamp>_<name>.sql`. The filename prefix (`YYYYMMDDHHMMSS_…`) is what Supabase orders by; copy the format of the existing migration. **Editing a migration after it's been applied won't re-run it** - always create a new file for changes.
+3. `bun run db:migrate` (or just `bun run dev`, which chains migrate before starting the apps).
+4. (Optional) `cd packages/db-drizzle && npx drizzle-kit generate` to have drizzle-kit produce the migration for you - but commit only one version.
+
+If you ever get stuck because a local migration was applied with stale content, `bun run db:reset` will wipe the local DB and re-apply everything.
 
 ### Adding a shadcn component
 
@@ -224,7 +228,7 @@ logout ──► logoutFn ──► invalidate ['user'] ──► redirect to /a
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT - see [LICENSE](LICENSE).
 
 ## Packages used
 

@@ -4,7 +4,7 @@
 	"version": "0.1.0",
 	"authors": ["Sören Steiger <ssteiger@users.noreply.github.com>"],
 	"private": true,
-	"packageManager": "npm@10.8.2",
+	"packageManager": "bun@1.2.23",
 	"workspaces": ["apps/*", "packages/*"],
 	"repository": {
 		"type": "git",
@@ -12,8 +12,10 @@
 	},
 	"scripts": {
 		"build": "turbo run build",
-		"dev": "bun run dev:db && turbo run dev --parallel",
+		"dev": "bun run dev:db && bun run db:migrate && turbo run dev --parallel",
 		"dev:db": "cd apps/supabase && npx supabase start",
+		"db:migrate": "cd apps/supabase && npx supabase migration up --local",
+		"db:reset": "cd apps/supabase && npx supabase db reset",
 		"dev:my-app": "turbo run dev --filter=@vibe-coding-boilerplate/my-app",
 		"dev:web": "turbo run dev --filter=@vibe-coding-boilerplate/web",
 		"typecheck": "turbo run typecheck",
