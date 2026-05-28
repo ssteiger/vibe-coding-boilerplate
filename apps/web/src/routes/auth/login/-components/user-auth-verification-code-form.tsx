@@ -6,17 +6,17 @@ import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import * as z from 'zod'
 
-import { verifyCodeFn } from '~/lib/auth/server'
-import { Button } from '~/lib/components/ui/button'
 import {
+  Button,
   Form,
   FormControl,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
-} from '~/lib/components/ui/form'
-import { Input } from '~/lib/components/ui/input'
+  Input,
+} from '@vibe-coding-boilerplate/ui'
+import { verifyCodeFn } from '~/lib/auth/server'
 
 const formSchema = z.object({
   code: z.string().min(1, {

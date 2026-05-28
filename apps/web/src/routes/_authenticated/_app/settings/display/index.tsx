@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { Separator } from '~/lib/components/ui/separator'
+import { Separator } from '@vibe-coding-boilerplate/ui'
 import { DisplayForm } from './-components/display-form'
 
 const SettingsDisplayPage = () => {

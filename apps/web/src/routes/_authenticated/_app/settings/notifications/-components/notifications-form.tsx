@@ -2,10 +2,9 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import * as z from 'zod'
 
-import { toast } from 'sonner'
-import { Button } from '~/lib/components/ui/button'
-import { Checkbox } from '~/lib/components/ui/checkbox'
 import {
+  Button,
+  Checkbox,
   Form,
   FormControl,
   FormDescription,
@@ -13,9 +12,11 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '~/lib/components/ui/form'
-import { RadioGroup, RadioGroupItem } from '~/lib/components/ui/radio-group'
-import { Switch } from '~/lib/components/ui/switch'
+  RadioGroup,
+  RadioGroupItem,
+  Switch,
+} from '@vibe-coding-boilerplate/ui'
+import { toast } from 'sonner'
 
 const notificationsFormSchema = z.object({
   type: z.enum(['all', 'mentions', 'none'], {

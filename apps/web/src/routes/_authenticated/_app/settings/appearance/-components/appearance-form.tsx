@@ -1,10 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { ChevronDown } from 'lucide-react'
-import { useForm } from 'react-hook-form'
-import { toast } from 'sonner'
-import { z } from 'zod'
-import { Button, buttonVariants } from '~/lib/components/ui/button'
 import {
+  Button,
   Form,
   FormControl,
   FormDescription,
@@ -12,9 +8,15 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '~/lib/components/ui/form'
-import { RadioGroup, RadioGroupItem } from '~/lib/components/ui/radio-group'
-import { cn } from '~/lib/utils/cn'
+  RadioGroup,
+  RadioGroupItem,
+  buttonVariants,
+  cn,
+} from '@vibe-coding-boilerplate/ui'
+import { ChevronDown } from 'lucide-react'
+import { useForm } from 'react-hook-form'
+import { toast } from 'sonner'
+import { z } from 'zod'
 
 const appearanceFormSchema = z.object({
   theme: z.enum(['light', 'dark'], {

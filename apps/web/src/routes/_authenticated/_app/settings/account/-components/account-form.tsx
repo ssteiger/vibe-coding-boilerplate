@@ -4,18 +4,15 @@ import { CalendarIcon, Check, ChevronsUpDown } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
-import { toast } from 'sonner'
-import { Button } from '~/lib/components/ui/button'
-import { Calendar } from '~/lib/components/ui/calendar'
 import {
+  Button,
+  Calendar,
   Command,
   CommandEmpty,
   CommandGroup,
   CommandInput,
   CommandItem,
   CommandList,
-} from '~/lib/components/ui/command'
-import {
   Form,
   FormControl,
   FormDescription,
@@ -23,18 +20,19 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '~/lib/components/ui/form'
-import { Input } from '~/lib/components/ui/input'
-import { Popover, PopoverContent, PopoverTrigger } from '~/lib/components/ui/popover'
-import {
+  Input,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '~/lib/components/ui/select'
-import { Textarea } from '~/lib/components/ui/textarea'
-import { cn } from '~/lib/utils/cn'
+  Textarea,
+  cn,
+} from '@vibe-coding-boilerplate/ui'
+import { toast } from 'sonner'
 
 const languages = [
   { label: 'English', value: 'en' },

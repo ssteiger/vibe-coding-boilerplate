@@ -8,11 +8,6 @@
       "node_modules",
       "next-env.d",
       "src/routeTree.gen.ts",
-      "src/lib/components/ui/breadcrumb.tsx",
-      "src/lib/components/ui/carousel.tsx",
-      "src/lib/components/ui/chart.tsx",
-      "src/lib/components/ui/input-otp.tsx",
-      "src/lib/components/ui/slider.tsx",
       "src/lib/styles/app.css"
     ]
   }

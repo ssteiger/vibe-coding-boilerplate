@@ -1,6 +1,5 @@
 import { Link, useLocation } from '@tanstack/react-router'
-import { buttonVariants } from '~/lib/components/ui/button'
-import { cn } from '~/lib/utils/cn'
+import { buttonVariants, cn } from '@vibe-coding-boilerplate/ui'
 
 interface SidebarNavProps extends React.HTMLAttributes<HTMLElement> {
   items: {

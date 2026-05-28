@@ -1,5 +1,5 @@
 import { Link } from '@tanstack/react-router'
-import { Button } from './ui/button'
+import { Button } from '@vibe-coding-boilerplate/ui'
 
 export function NotFound() {
   return (

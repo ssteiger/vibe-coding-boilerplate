@@ -1,40 +1,33 @@
 import { QueryClient } from '@tanstack/react-query'
 import { createRouter as createTanStackRouter } from '@tanstack/react-router'
-import { routerWithQueryClient } from '@tanstack/react-router-with-query'
+import { setupRouterSsrQueryIntegration } from '@tanstack/react-router-ssr-query'
 
 import { DefaultCatchBoundary } from '~/lib/components/DefaultCatchBoundary'
 import { NotFound } from '~/lib/components/NotFound'
 import { routeTree } from './routeTree.gen'
 
-export function createRouter() {
+export function getRouter() {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
         refetchOnWindowFocus: false,
-        //staleTime: 1000 * 60, // 1 minute
       },
     },
   })
 
-  return routerWithQueryClient(
-    createTanStackRouter({
-      routeTree,
-      context: { queryClient, user: null },
-      defaultPreload: 'intent',
-      // react-query will handle data fetching & caching
-      // https://tanstack.com/router/latest/docs/framework/react/guide/data-loading#passing-all-loader-events-to-an-external-cache
-      defaultPreloadStaleTime: 0,
-      defaultErrorComponent: DefaultCatchBoundary,
-      defaultNotFoundComponent: NotFound,
-      scrollRestoration: true,
-      defaultStructuralSharing: true,
-    }),
-    queryClient,
-  )
-}
+  const router = createTanStackRouter({
+    routeTree,
+    context: { queryClient, user: null },
+    defaultPreload: 'intent',
+    // react-query handles data fetching & caching
+    defaultPreloadStaleTime: 0,
+    defaultErrorComponent: DefaultCatchBoundary,
+    defaultNotFoundComponent: NotFound,
+    scrollRestoration: true,
+    defaultStructuralSharing: true,
+  })
 
-declare module '@tanstack/react-router' {
-  interface Register {
-    router: ReturnType<typeof createRouter>
-  }
+  setupRouterSsrQueryIntegration({ router, queryClient })
+
+  return router
 }

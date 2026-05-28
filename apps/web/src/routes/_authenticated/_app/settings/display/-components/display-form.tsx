@@ -1,10 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm } from 'react-hook-form'
-import { toast } from 'sonner'
-import { z } from 'zod'
-import { Button } from '~/lib/components/ui/button'
-import { Checkbox } from '~/lib/components/ui/checkbox'
 import {
+  Button,
+  Checkbox,
   Form,
   FormControl,
   FormDescription,
@@ -12,7 +9,10 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '~/lib/components/ui/form'
+} from '@vibe-coding-boilerplate/ui'
+import { useForm } from 'react-hook-form'
+import { toast } from 'sonner'
+import { z } from 'zod'
 
 const items = [
   {

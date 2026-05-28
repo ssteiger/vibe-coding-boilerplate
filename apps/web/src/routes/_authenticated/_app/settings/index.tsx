@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { Separator } from '~/lib/components/ui/separator'
+import { Separator } from '@vibe-coding-boilerplate/ui'
 import { ProfileForm } from './-components/profile-form'
 
 const SettingsProfilePage = () => {

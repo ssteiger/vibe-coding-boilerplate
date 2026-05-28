@@ -1,6 +1,6 @@
 import { redirect } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
-import { getRequestURL } from '@tanstack/react-start/server'
+import { getRequest } from '@tanstack/react-start/server'
 
 import { getSupabaseServerClient } from '~/lib/utils/supabase/server'
 
@@ -14,7 +14,7 @@ import { getSupabaseServerClient } from '~/lib/utils/supabase/server'
  * silently fall back to `site_url`.
  */
 function authCallbackUrl(): string {
-  const url = getRequestURL()
+  const url = new URL(getRequest().url)
   return new URL('/auth/callback', `${url.protocol}//${url.host}`).toString()
 }
 
@@ -59,7 +59,7 @@ export const getCurrentUser = createServerFn({ method: 'GET' }).handler(
 )
 
 export const loginFn = createServerFn()
-  .validator((data: { email: string }) => data)
+  .inputValidator((data: { email: string }) => data)
   .handler(async ({ data }) => {
     const supabase = getSupabaseServerClient()
     const { error } = await supabase.auth.signInWithOtp({
@@ -74,7 +74,7 @@ export const loginFn = createServerFn()
   })
 
 export const verifyCodeFn = createServerFn()
-  .validator((data: { email: string; code: string }) => data)
+  .inputValidator((data: { email: string; code: string }) => data)
   .handler(async ({ data }) => {
     const supabase = getSupabaseServerClient()
     const { error } = await supabase.auth.verifyOtp({
@@ -88,7 +88,7 @@ export const verifyCodeFn = createServerFn()
   })
 
 export const oauthFn = createServerFn()
-  .validator((data: { provider: 'github' }) => data)
+  .inputValidator((data: { provider: 'github' }) => data)
   .handler(async ({ data }) => {
     const supabase = getSupabaseServerClient()
     const { data: result, error } = await supabase.auth.signInWithOAuth({
@@ -108,7 +108,7 @@ export const oauthFn = createServerFn()
  * `@supabase/ssr` writes the resulting cookies onto the redirect response.
  */
 export const exchangeCodeFn = createServerFn({ method: 'GET' })
-  .validator((data: { code: string }) => data)
+  .inputValidator((data: { code: string }) => data)
   .handler(async ({ data }) => {
     const supabase = getSupabaseServerClient()
     const { error } = await supabase.auth.exchangeCodeForSession(data.code)

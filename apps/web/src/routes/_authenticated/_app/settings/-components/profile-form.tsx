@@ -2,9 +2,8 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import * as z from 'zod'
 
-import { toast } from 'sonner'
-import { Button } from '~/lib/components/ui/button'
 import {
+  Button,
   Form,
   FormControl,
   FormDescription,
@@ -12,9 +11,10 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '~/lib/components/ui/form'
-import { Input } from '~/lib/components/ui/input'
-import { Textarea } from '~/lib/components/ui/textarea'
+  Input,
+  Textarea,
+} from '@vibe-coding-boilerplate/ui'
+import { toast } from 'sonner'
 
 const profileFormSchema = z.object({
   username: z

@@ -4,10 +4,8 @@ export const Route = createFileRoute('/_authenticated')({
   beforeLoad: async ({ context }) => {
     const { user } = context
 
-    console.log('_authenticated', { user })
-
     if (!user) {
-      return redirect({ to: '/auth/login' })
+      throw redirect({ to: '/auth/login' })
     }
 
     return {
