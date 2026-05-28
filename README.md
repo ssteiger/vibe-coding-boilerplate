@@ -112,28 +112,22 @@ If you'd rather have drizzle-kit produce the SQL for you, run `npx drizzle-kit g
 nvm use
 bun install
 
-# 2. Create local env files from the templates
-cp apps/web/.env.example       apps/web/.env
-cp apps/my-app/.env.example    apps/my-app/.env
-cp packages/db-drizzle/.env.example packages/db-drizzle/.env
-
-# 3. Boot the Supabase containers (Postgres, GoTrue, Studio, Inbucket, ...)
-bun run dev:db
-
-# 4. Copy the printed `anon key` (and `service_role key` if you need it)
-#    into the SUPABASE_ANON_KEY entry of:
-#      - apps/web/.env
-#      - apps/my-app/.env
-#    You can re-print them any time with `cd apps/supabase && npx supabase status`.
-
-# 5. Apply migrations (idempotent - also chained into `bun run dev`)
-bun run db:migrate
+# 2. That's it. `bun run dev` is the one-shot bootstrap (and reload) command.
+bun run dev
 ```
+
+`bun run dev` runs five idempotent steps in order, each individually scriptable:
+
+1. `env:check` -- copies `.env.example` to `.env` for each app/package that doesn't already have one.
+2. `dev:db` -- boots the Supabase containers (Postgres, GoTrue, Studio, Inbucket, ...).
+3. `env:sync` -- reads `supabase status -o env` from the running stack and splices the freshly-generated `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, S3 keys, and JWT secret into every local `.env`. **Safety guard**: any `.env` whose `SUPABASE_API_URL` or `SUPABASE_DB_URL` points at a non-local host is skipped, so this can never clobber prod credentials.
+4. `db:migrate` -- applies any new SQL migrations under `apps/supabase/migrations/`. No-op when nothing has changed.
+5. `turbo run dev --parallel` -- boots all workspace `dev` scripts (web + my-app).
 
 ### Day-to-day
 
 ```bash
-# Boots Supabase, applies any new migrations, then runs both apps in parallel.
+# Same five steps as the bootstrap above, all idempotent.
 bun run dev
 ```
 
@@ -141,6 +135,8 @@ Or run individual services:
 
 ```bash
 bun run dev:db        # Supabase stack only
+bun run env:check     # Create any missing .env from its .env.example
+bun run env:sync      # Pull anon/service-role/S3 keys from `supabase status` into the local .env files
 bun run db:migrate    # Apply any new migrations (no-op when already applied)
 bun run db:reset      # DESTRUCTIVE - drop the local DB and re-apply migrations
 bun run dev:web       # TanStack Start app at http://127.0.0.1:3000
@@ -226,10 +222,6 @@ logout ──► logoutFn ──► invalidate ['user'] ──► redirect to /a
 
 ---
 
-## License
-
-MIT - see [LICENSE](LICENSE).
-
 ## Packages used
 
 - [tanstack/start](https://tanstack.com/start/latest) · [tanstack/react-router](https://tanstack.com/router/latest) · [tanstack/react-query](https://tanstack.com/query/latest)
@@ -237,3 +229,7 @@ MIT - see [LICENSE](LICENSE).
 - [supabase](https://supabase.com) (DB + auth via `@supabase/ssr`)
 - [shadcn/ui](https://ui.shadcn.com/docs/components) · [tailwindcss v4](https://tailwindcss.com) · [lucide icons](https://lucide.dev) · [sonner](https://sonner.emilkowal.ski/)
 - [biome](https://biomejs.dev) · [eslint](https://eslint.org) · [turborepo](https://turbo.build) · [bun](https://bun.sh)
+
+## License
+
+MIT - see [LICENSE](LICENSE).

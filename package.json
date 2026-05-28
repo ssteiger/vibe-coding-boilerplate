@@ -12,7 +12,7 @@
 	},
 	"scripts": {
 		"build": "turbo run build",
-		"dev": "bun run dev:db && bun run db:migrate && turbo run dev --parallel",
+		"dev": "bun run env:check && bun run dev:db && bun run env:sync && bun run db:migrate && turbo run dev --parallel",
 		"dev:db": "cd apps/supabase && npx supabase start",
 		"db:migrate": "cd apps/supabase && npx supabase migration up --local",
 		"db:reset": "cd apps/supabase && npx supabase db reset",
@@ -21,7 +21,8 @@
 		"typecheck": "turbo run typecheck",
 		"lint": "turbo run biome:check",
 		"format": "turbo run biome:format",
-		"env:check": "node scripts.js env:check"
+		"env:check": "node scripts.js env:check",
+		"env:sync": "node scripts.js env:sync"
 	},
 	"devDependencies": {
 		"supabase": "^2.20.5",
