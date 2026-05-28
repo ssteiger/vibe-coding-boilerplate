@@ -1,7 +1,22 @@
 import { redirect } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
+import { getRequestURL } from '@tanstack/react-start/server'
 
 import { getSupabaseServerClient } from '~/lib/utils/supabase/server'
+
+/**
+ * Absolute URL to send Supabase magic-link / OAuth redirects to. Derived from
+ * the live request so it works in dev, prod, preview deploys, and `127.0.0.1`
+ * vs `localhost` without any env-var juggling.
+ *
+ * IMPORTANT: every host returned here must be in
+ * `apps/supabase/config.toml`'s `additional_redirect_urls`, or Supabase will
+ * silently fall back to `site_url`.
+ */
+function authCallbackUrl(): string {
+  const url = getRequestURL()
+  return new URL('/auth/callback', `${url.protocol}//${url.host}`).toString()
+}
 
 /**
  * Shape of the authenticated user available to the rest of the app. The
@@ -50,7 +65,7 @@ export const loginFn = createServerFn()
     const { error } = await supabase.auth.signInWithOtp({
       email: data.email,
       options: {
-        emailRedirectTo: '/auth/callback',
+        emailRedirectTo: authCallbackUrl(),
       },
     })
 
@@ -79,12 +94,26 @@ export const oauthFn = createServerFn()
     const { data: result, error } = await supabase.auth.signInWithOAuth({
       provider: data.provider,
       options: {
-        redirectTo: '/auth/callback',
+        redirectTo: authCallbackUrl(),
       },
     })
 
     if (error) throw new Error(error.message)
     return { url: result.url }
+  })
+
+/**
+ * PKCE code exchange — Supabase's magic-link / OAuth redirect lands the
+ * browser on `/auth/callback?code=<>`. We swap the code for a session here;
+ * `@supabase/ssr` writes the resulting cookies onto the redirect response.
+ */
+export const exchangeCodeFn = createServerFn({ method: 'GET' })
+  .validator((data: { code: string }) => data)
+  .handler(async ({ data }) => {
+    const supabase = getSupabaseServerClient()
+    const { error } = await supabase.auth.exchangeCodeForSession(data.code)
+    if (error) throw new Error(error.message)
+    return { success: true }
   })
 
 export const logoutFn = createServerFn().handler(async () => {

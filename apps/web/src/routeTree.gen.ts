@@ -12,6 +12,7 @@
 
 import { Route as rootRoute } from './routes/__root'
 import { Route as AuthenticatedImport } from './routes/_authenticated'
+import { Route as AuthCallbackImport } from './routes/auth/callback'
 import { Route as AuthenticatedAppImport } from './routes/_authenticated/_app'
 import { Route as AuthRegisterIndexImport } from './routes/auth/register/index'
 import { Route as AuthLoginIndexImport } from './routes/auth/login/index'
@@ -28,6 +29,12 @@ import { Route as AuthenticatedAppSettingsAccountIndexImport } from './routes/_a
 
 const AuthenticatedRoute = AuthenticatedImport.update({
   id: '/_authenticated',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const AuthCallbackRoute = AuthCallbackImport.update({
+  id: '/auth/callback',
+  path: '/auth/callback',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -119,6 +126,13 @@ declare module '@tanstack/react-router' {
       fullPath: ''
       preLoaderRoute: typeof AuthenticatedAppImport
       parentRoute: typeof AuthenticatedImport
+    }
+    '/auth/callback': {
+      id: '/auth/callback'
+      path: '/auth/callback'
+      fullPath: '/auth/callback'
+      preLoaderRoute: typeof AuthCallbackImport
+      parentRoute: typeof rootRoute
     }
     '/_authenticated/_app/': {
       id: '/_authenticated/_app/'
@@ -239,6 +253,7 @@ const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
 
 export interface FileRoutesByFullPath {
   '': typeof AuthenticatedAppRouteWithChildren
+  '/auth/callback': typeof AuthCallbackRoute
   '/': typeof AuthenticatedAppIndexRoute
   '/auth/login': typeof AuthLoginIndexRoute
   '/auth/register': typeof AuthRegisterIndexRoute
@@ -253,6 +268,7 @@ export interface FileRoutesByFullPath {
 
 export interface FileRoutesByTo {
   '': typeof AuthenticatedRouteWithChildren
+  '/auth/callback': typeof AuthCallbackRoute
   '/': typeof AuthenticatedAppIndexRoute
   '/auth/login': typeof AuthLoginIndexRoute
   '/auth/register': typeof AuthRegisterIndexRoute
@@ -269,6 +285,7 @@ export interface FileRoutesById {
   __root__: typeof rootRoute
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/_authenticated/_app': typeof AuthenticatedAppRouteWithChildren
+  '/auth/callback': typeof AuthCallbackRoute
   '/_authenticated/_app/': typeof AuthenticatedAppIndexRoute
   '/auth/login/': typeof AuthLoginIndexRoute
   '/auth/register/': typeof AuthRegisterIndexRoute
@@ -285,6 +302,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | ''
+    | '/auth/callback'
     | '/'
     | '/auth/login'
     | '/auth/register'
@@ -298,6 +316,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | ''
+    | '/auth/callback'
     | '/'
     | '/auth/login'
     | '/auth/register'
@@ -312,6 +331,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/_authenticated'
     | '/_authenticated/_app'
+    | '/auth/callback'
     | '/_authenticated/_app/'
     | '/auth/login/'
     | '/auth/register/'
@@ -327,12 +347,14 @@ export interface FileRouteTypes {
 
 export interface RootRouteChildren {
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
+  AuthCallbackRoute: typeof AuthCallbackRoute
   AuthLoginIndexRoute: typeof AuthLoginIndexRoute
   AuthRegisterIndexRoute: typeof AuthRegisterIndexRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
+  AuthCallbackRoute: AuthCallbackRoute,
   AuthLoginIndexRoute: AuthLoginIndexRoute,
   AuthRegisterIndexRoute: AuthRegisterIndexRoute,
 }
@@ -348,6 +370,7 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/_authenticated",
+        "/auth/callback",
         "/auth/login/",
         "/auth/register/"
       ]
@@ -371,6 +394,9 @@ export const routeTree = rootRoute
         "/_authenticated/_app/settings/display/",
         "/_authenticated/_app/settings/notifications/"
       ]
+    },
+    "/auth/callback": {
+      "filePath": "auth/callback.tsx"
     },
     "/_authenticated/_app/": {
       "filePath": "_authenticated/_app/index.tsx",
