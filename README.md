@@ -1,88 +1,235 @@
 # Vibe Coding Boilerplate
 
-A boilerplate to quickly start vibe coding.
+A starting point for projects where you want to **write a feature top-to-bottom in one file** — the SQL query, the server function that runs it, and the React component that consumes it — without losing end-to-end type safety.
 
-SQL data queries and the frontend component that consumes the data are located in the same file.
-This together with end-to-end type safety makes this setup ideal for vibe coding.
+The opinionated bet: small full-stack features are easier to read, change, and let an LLM iterate on when they're colocated. The tools below were picked so that "one file owns one screen" stays viable as the project grows.
 
-## Local development
+---
+
+## Why this stack
+
+| Concern | Choice | Why this one |
+| --- | --- | --- |
+| Server + router + RSC-style data fetching | **TanStack Start** (Vinxi) | File-based routes, typed `Link`s, and `createServerFn(...).handler(...)` so a single `.tsx` file can hold both the server query and the component that renders it. |
+| DB access | **Drizzle ORM** (`postgres-js`) | Schema is hand-authored TypeScript → tables, columns, and query results are all typed end-to-end with zero codegen step. |
+| Database + auth | **Supabase** (CLI for local dev) | One container brings up Postgres, GoTrue auth, Storage, Realtime, and Studio. Auth is consumed through `@supabase/ssr` so it works inside server functions. |
+| Client state / caching | **TanStack Query** | Powers the `['user']` cache in `__root.tsx` and the auto-refreshing `['logs']` query in `activity-logs/`. |
+| UI | **shadcn/ui** + Tailwind v4 + lucide-react + sonner | Owned source code (vendored into `apps/web/src/lib/components/ui/`), no runtime UI dependency. |
+| Monorepo | **Bun workspaces** + **Turborepo** | Fast installs, cached typecheck/lint, parallel `dev`. |
+| Lint / format | **Biome** + **ESLint** | Biome is the fast default; ESLint adds React-specific plugins (react-compiler, eslint-react, query, router). |
+
+The two opinions that drive the rest of the design:
+
+1. **Drizzle, not generated Supabase types**, is the single source of truth for table shapes. We don't run `supabase gen types` — the Drizzle schema in [packages/db-drizzle/src/schema.ts](packages/db-drizzle/src/schema.ts) is authored by hand, and SQL migrations in `apps/supabase/migrations/` are kept in sync with it.
+2. **Server functions live next to the component that uses them.** TanStack Start's `createServerFn` runs on the server but is imported and called from client code with full type inference — see the activity-logs example below.
+
+---
+
+## Repository layout
+
+```text
+vibe-coding-boilerplate/
+├── apps/
+│   ├── web/         TanStack Start app (the "vibe" surface).
+│   │                Routes, shadcn UI, auth, server functions.
+│   ├── my-app/      Standalone tsx script. Demonstrates how to
+│   │                reuse the Drizzle package from a non-web
+│   │                entrypoint (e.g. background worker, cron).
+│   └── supabase/    Local Supabase config (ports, auth providers,
+│                    email templates) and SQL migrations.
+├── packages/
+│   ├── db-drizzle/      Drizzle schema, drizzle-kit config, and
+│   │                    the `postgres_db` client. Imported by both
+│   │                    apps as `@vibe-coding-boilerplate/db-drizzle`.
+│   ├── tsconfig/        Shared `base.json` + `react.json` tsconfigs.
+│   │                    Apps extend these via relative path.
+│   └── biome-config/    Shared Biome rules. Apps extend via relative
+│                        path so all packages format identically.
+└── turbo.json, package.json, bun.lock
+```
+
+### The "one-file feature" pattern
+
+Open [apps/web/src/routes/\_authenticated/\_app/activity-logs/index.tsx](apps/web/src/routes/_authenticated/_app/activity-logs/index.tsx) to see the whole pattern in ~85 lines. The same file contains:
+
+```tsx
+// 1. A server function that talks directly to Postgres via Drizzle.
+const fetchLogs = createServerFn({ method: 'GET' }).handler(async () => {
+  return postgres_db
+    .select()
+    .from(schema.logs)
+    .orderBy(desc(schema.logs.created_at))
+    .limit(1000)
+})
+
+// 2. A React component that calls the server function via React Query.
+const LogsPage = () => {
+  const { data: logs } = useQuery({
+    queryKey: ['logs'],
+    queryFn: () => fetchLogs(),
+    refetchInterval: 10_000,
+  })
+  return <DataTable data={logs ?? []} columns={columns} />
+}
+
+// 3. The TanStack Router file-route binding.
+export const Route = createFileRoute('/_authenticated/_app/activity-logs/')({
+  component: LogsPage,
+})
+```
+
+`postgres_db` and `schema.logs` are inferred from the hand-written Drizzle schema, so the row type flows from Postgres column → Drizzle select → server fn return → `useQuery` → JSX without a single `as Foo` cast.
+
+### Authentication
+
+All auth server functions live in [apps/web/src/lib/auth/server.ts](apps/web/src/lib/auth/server.ts): `loginFn` (magic link), `verifyCodeFn` (OTP), `oauthFn` (GitHub), `logoutFn`, and `getCurrentUser`. The root route ([apps/web/src/routes/\_\_root.tsx](apps/web/src/routes/__root.tsx)) calls `getCurrentUser` once per navigation, caches it in React Query under `['user']` with a 30s stale window, and exposes `context.user` to every route. The `_authenticated` route segment ([apps/web/src/routes/\_authenticated.tsx](apps/web/src/routes/_authenticated.tsx)) redirects to `/auth/login` if `context.user` is null.
+
+Login / verify / logout mutations all invalidate `['user']` on success so a fresh session is picked up immediately.
+
+### Drizzle as source of truth
+
+- Edit [packages/db-drizzle/src/schema.ts](packages/db-drizzle/src/schema.ts) to add or change tables.
+- Write the matching SQL change in `apps/supabase/migrations/<timestamp>_<name>.sql` (Supabase applies it via `supabase migration up`).
+- Re-export anything you need in [packages/db-drizzle/src/types.ts](packages/db-drizzle/src/types.ts) (`InferSelectModel`, `InferInsertModel`).
+
+If you'd rather have drizzle-kit produce the SQL for you, run `npx drizzle-kit generate` from `packages/db-drizzle` after editing the schema; it'll write into `packages/db-drizzle/drizzle/`.
+
+---
+
+## Running locally
+
+### Prerequisites
+
+- **Node 20.18.0** — pinned in [.nvmrc](.nvmrc). `nvm use` will switch you.
+- **Bun ≥ 1.2** — `curl -fsSL https://bun.sh/install | bash`
+- **Supabase CLI** — `brew install supabase/tap/supabase` (the CLI is also installed as a dev dependency in this repo for the `npx supabase` invocations).
+- **Docker Desktop** running — Supabase's local stack runs in containers.
+
+### First-time setup
 
 ```bash
-nvm use v20.18.0
-
-# install dependencies
+# 1. Pin Node and install deps
+nvm use
 bun install
 
-# create .env file
-cp apps/web/.env.example apps/web/.env
-cp apps/my-app/.env.example apps/my-app/.env
+# 2. Create local env files from the templates
+cp apps/web/.env.example       apps/web/.env
+cp apps/my-app/.env.example    apps/my-app/.env
 cp packages/db-drizzle/.env.example packages/db-drizzle/.env
 
-# start all services
-bun run dev
-
-# copy the SUPABASE_ANON_KEY from the console into apps/web/.env and apps/my-app/.env
-```
-
-> The Supabase ports are defined in [apps/supabase/config.toml](apps/supabase/config.toml)
-> (`54421` API, `54422` DB, `54423` Studio, `54424` Inbucket). If you have an older local
-> `.env` referencing `543xx` ports, refresh it from the corresponding `.env.example`.
-
-### Database
-
-```bash
-# prepare database
-cd apps/supabase
-supabase migration up
-```
-
-### Start single Services
-
-```bash
-# run local supabase server
+# 3. Boot the Supabase containers (Postgres, GoTrue, Studio, Inbucket, ...)
 bun run dev:db
 
-# copy the SUPABASE_ANON_KEY from the console into apps/web/.env and apps/my-app/.env
+# 4. Copy the printed `anon key` (and `service_role key` if you need it)
+#    into the SUPABASE_ANON_KEY entry of:
+#      - apps/web/.env
+#      - apps/my-app/.env
+#    You can re-print them any time with `cd apps/supabase && npx supabase status`.
 
-# open supabase dashboard at http://127.0.0.1:54423/project/default
+# 5. Apply migrations
+cd apps/supabase && npx supabase migration up && cd ../..
 ```
+
+### Day-to-day
 
 ```bash
-# run app
-bun run dev:my-app
+# Everything (DB + web + my-app worker) in one go.
+bun run dev
 ```
+
+Or run individual services:
 
 ```bash
-# run web app
-bun run dev:web
-
-# open web app at http://127.0.0.1:3000
+bun run dev:db        # Supabase stack only
+bun run dev:web       # TanStack Start app at http://127.0.0.1:3000
+bun run dev:my-app    # tsx watcher for the standalone script
 ```
 
-## Update Drizzle schema
+Useful local URLs while `dev:db` is running:
 
-The Drizzle schema lives at [packages/db-drizzle/src/schema.ts](packages/db-drizzle/src/schema.ts) and is the
-source of truth for typed DB access. Edit it directly when adding/changing tables, then keep the matching
-SQL migration in `apps/supabase/migrations/` in sync.
+| Service | URL |
+| --- | --- |
+| Web app | <http://127.0.0.1:3000> |
+| Supabase Studio (DB UI) | <http://127.0.0.1:54423/project/default> |
+| Supabase API | <http://127.0.0.1:54421> |
+| Inbucket (catches outgoing emails, including magic-link OTPs) | <http://127.0.0.1:54424> |
 
-To produce a fresh migration from the Drizzle schema:
+> The Supabase ports are defined in [apps/supabase/config.toml](apps/supabase/config.toml) (`54421` API, `54422` DB, `54423` Studio, `54424` Inbucket). If you have an older local `.env` referencing `543xx` ports, refresh it from the corresponding `.env.example`.
+
+### Checks
 
 ```bash
-cd packages/db-drizzle
-npx drizzle-kit generate
+bun run typecheck     # tsc --noEmit on every workspace
+bun run lint          # biome check on every workspace
+bun run format        # biome format --write on every workspace
 ```
 
-## Prep for first time setup
+ESLint also runs on `apps/web` if you call it directly (`cd apps/web && bunx eslint src`); the shadcn-vendored components under `apps/web/src/lib/components/ui/` are intentionally ignored by both Biome and ESLint.
+
+---
+
+## How to work in this repo
+
+### Adding a screen + query
+
+1. Create the file route under `apps/web/src/routes/...` (TanStack Router file conventions: `index.tsx`, `_authenticated.tsx` for layout segments, `-components/` for route-private components).
+2. In the same file, define a `createServerFn({ method: 'GET' }).handler(async () => …)` that uses `postgres_db` + `schema.*` from `@vibe-coding-boilerplate/db-drizzle`.
+3. Call it from `useQuery` (or `useMutation` for writes). Errors thrown server-side surface in React Query's `error`.
+
+### Adding a table
+
+1. Add the `pgTable(...)` definition to [packages/db-drizzle/src/schema.ts](packages/db-drizzle/src/schema.ts).
+2. Write the SQL in a new `apps/supabase/migrations/<timestamp>_<name>.sql`. The timestamp prefix is what Supabase orders by; copy the format of the existing migration.
+3. `cd apps/supabase && npx supabase migration up`.
+4. (Optional) `cd packages/db-drizzle && npx drizzle-kit generate` to have drizzle-kit produce the migration for you — but commit only one version.
+
+### Adding a shadcn component
 
 ```bash
-# install turbo cli
-bun install turbo --global
+cd apps/web
+bun run ui add <component-name>
 ```
 
-## Packages
+It writes into `apps/web/src/lib/components/ui/` and is automatically excluded from lint.
 
-- [tanstack/start](https://tanstack.com/start/latest)
-- [shadcn/ui](https://ui.shadcn.com/docs/components)
-- [lucide icons](https://lucide.dev)
-- [sonner](https://sonner.emilkowal.ski/)
-- [supabase](https://supabase.com)
+### Adding a new app or package
+
+1. Create the folder under `apps/` or `packages/` with a `package.json` named `@vibe-coding-boilerplate/<name>` and `"private": true`.
+2. `extends` the shared configs:
+
+   ```jsonc
+   // tsconfig.json
+   { "extends": "../../packages/tsconfig/base.json" /* or react.json */ }
+   ```
+
+   ```jsonc
+   // biome.json
+   { "extends": ["../../packages/biome-config/biome.json"] }
+   ```
+
+3. Run `bun install` at the repo root to wire up the workspace symlinks.
+
+### Auth flow
+
+```text
+visitor ──► /auth/login ──► loginFn (magic link emailed via Inbucket)
+                       └─► verifyCodeFn (OTP) ──► invalidate ['user']
+                                                └─► redirect to /
+authenticated ──► /_authenticated/* (guarded by context.user)
+                                  └─► getCurrentUser cached 30s in ['user']
+logout ──► logoutFn ──► invalidate ['user'] ──► redirect to /auth/login
+```
+
+---
+
+## License
+
+MIT — see [LICENSE](LICENSE).
+
+## Packages used
+
+- [tanstack/start](https://tanstack.com/start/latest) · [tanstack/react-router](https://tanstack.com/router/latest) · [tanstack/react-query](https://tanstack.com/query/latest)
+- [drizzle-orm](https://orm.drizzle.team) · [postgres-js](https://github.com/porsager/postgres)
+- [supabase](https://supabase.com) (DB + auth via `@supabase/ssr`)
+- [shadcn/ui](https://ui.shadcn.com/docs/components) · [tailwindcss v4](https://tailwindcss.com) · [lucide icons](https://lucide.dev) · [sonner](https://sonner.emilkowal.ski/)
+- [biome](https://biomejs.dev) · [eslint](https://eslint.org) · [turborepo](https://turbo.build) · [bun](https://bun.sh)
