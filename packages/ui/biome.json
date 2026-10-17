@@ -6,11 +6,11 @@
       ".turbo",
       ".vscode",
       "node_modules",
-      "src/components/ui/breadcrumb.tsx",
-      "src/components/ui/carousel.tsx",
-      "src/components/ui/chart.tsx",
-      "src/components/ui/input-otp.tsx",
-      "src/components/ui/slider.tsx",
+      "src/components/ui/Breadcrumb.tsx",
+      "src/components/ui/Carousel.tsx",
+      "src/components/ui/Chart.tsx",
+      "src/components/ui/InputOtp.tsx",
+      "src/components/ui/Slider.tsx",
       "src/styles/app.css"
     ]
   }

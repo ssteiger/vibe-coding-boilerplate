@@ -1,4 +1,152 @@
+/*
+ * Self-hosted Inter from Google Fonts (variable, 100–900; subsets load on demand).
+ * The optical-size axis gives titles Inter's display cut and body text its text cut.
+ */
+@import "@fontsource-variable/inter/opsz.css";
+@import "@fontsource-variable/inter/opsz-italic.css";
+@import "@fontsource-variable/geist-mono";
+
 @import "tailwindcss" source("../../");
 @import "@vibe-coding-boilerplate/ui/styles/theme.css";
+@import "./typeset.css";
 
 @source "../../../../../packages/ui/src";
+
+@theme {
+  /* Proportional text for the interface; mono only for code and coordinates. */
+  --font-sans: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Geist Mono Variable", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-heading: var(--font-sans);
+
+  /* A dense scale: 15px for reading, 13px for interface text and secondary lines. */
+  --text-sm: 0.8125rem;
+  --text-sm--line-height: 1.5;
+  --text-base: 0.9375rem;
+  --text-base--line-height: 1.6;
+
+  /* Inter is variable, so medium and semibold sit between the usual steps. */
+  --font-weight-medium: 510;
+  --font-weight-semibold: 590;
+}
+
+/*
+ * Tailwind's preflight gives buttons the default arrow; show the hand on
+ * anything clickable. Layered so a cursor-* utility on a component still wins.
+ */
+@layer base {
+  a[href],
+  summary,
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]) {
+    cursor: pointer;
+  }
+
+  /* Titles sit a little tighter than body text; a tracking-* utility still wins. */
+  h1,
+  h2 {
+    letter-spacing: -0.022em;
+  }
+
+  [data-slot="card-title"] {
+    letter-spacing: -0.011em;
+  }
+}
+
+/* shadcn/typeset preset for rendered markdown and long-form content. */
+.typeset-docs {
+  --typeset-font-body: var(--font-sans);
+  --typeset-font-heading: var(--font-heading);
+  --typeset-font-mono: var(--font-mono);
+  --typeset-size: 0.9375rem;
+  --typeset-leading: 1.6;
+  --typeset-flow: 1.15em;
+}
+
+.typeset :where(h1, h2, h3, h4, h5, h6) {
+  font-weight: 510;
+  letter-spacing: -0.012em;
+}
+
+/*
+ * Reading adjustments.
+ * Unlayered so they win over Tailwind utilities on shared components.
+ */
+
+::selection {
+  background: var(--highlight);
+  color: var(--foreground);
+}
+
+/* The parts the browser draws itself: scrollbars, native controls, the caret, underlines. */
+:root {
+  color-scheme: light;
+  accent-color: var(--brand);
+  caret-color: var(--brand);
+  scrollbar-color: color-mix(in oklab, var(--muted-foreground) 40%, transparent) transparent;
+  text-underline-offset: 0.2em;
+}
+
+.dark {
+  color-scheme: dark;
+}
+
+code,
+kbd,
+samp,
+pre {
+  font-family: var(--font-mono);
+}
+
+/* clip rather than hidden: hidden makes this a scroll container and breaks position: sticky inside pages. */
+[data-slot="sidebar-inset"] {
+  overflow: clip;
+}
+
+[data-slot="table"] {
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+
+[data-slot="table"] th {
+  font-size: 0.75rem;
+  font-weight: 510;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--muted-foreground);
+}
+
+[data-slot="table"] td {
+  white-space: normal;
+  overflow-wrap: break-word;
+  vertical-align: top;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Settings → General. Everything is sized in rem, so the root size scales the whole app. */
+html[data-text="large"] {
+  font-size: 112.5%;
+}
+
+html[data-text="larger"] {
+  font-size: 125%;
+}
+
+html[data-motion="reduce"] *,
+html[data-motion="reduce"] *::before,
+html[data-motion="reduce"] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-motion="system"] *,
+  html[data-motion="system"] *::before,
+  html[data-motion="system"] *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

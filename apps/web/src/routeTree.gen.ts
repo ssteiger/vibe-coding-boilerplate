@@ -15,12 +15,10 @@ import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/_a
 import { Route as AuthRegisterIndexRouteImport } from './routes/auth/register/index'
 import { Route as AuthLoginIndexRouteImport } from './routes/auth/login/index'
 import { Route as AuthenticatedAppIndexRouteImport } from './routes/_authenticated/_app/index'
+import { Route as AuthenticatedAppSettingsRouteRouteImport } from './routes/_authenticated/_app/settings/route'
 import { Route as AuthenticatedAppSettingsIndexRouteImport } from './routes/_authenticated/_app/settings/index'
 import { Route as AuthenticatedAppHomeIndexRouteImport } from './routes/_authenticated/_app/home/index'
 import { Route as AuthenticatedAppActivityLogsIndexRouteImport } from './routes/_authenticated/_app/activity-logs/index'
-import { Route as AuthenticatedAppSettingsNotificationsIndexRouteImport } from './routes/_authenticated/_app/settings/notifications/index'
-import { Route as AuthenticatedAppSettingsDisplayIndexRouteImport } from './routes/_authenticated/_app/settings/display/index'
-import { Route as AuthenticatedAppSettingsAppearanceIndexRouteImport } from './routes/_authenticated/_app/settings/appearance/index'
 import { Route as AuthenticatedAppSettingsAccountIndexRouteImport } from './routes/_authenticated/_app/settings/account/index'
 
 const AuthenticatedRoute = AuthenticatedRouteImport.update({
@@ -51,11 +49,17 @@ const AuthenticatedAppIndexRoute = AuthenticatedAppIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthenticatedAppRoute,
 } as any)
+const AuthenticatedAppSettingsRouteRoute =
+  AuthenticatedAppSettingsRouteRouteImport.update({
+    id: '/settings',
+    path: '/settings',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
 const AuthenticatedAppSettingsIndexRoute =
   AuthenticatedAppSettingsIndexRouteImport.update({
-    id: '/settings/',
-    path: '/settings/',
-    getParentRoute: () => AuthenticatedAppRoute,
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedAppSettingsRouteRoute,
   } as any)
 const AuthenticatedAppHomeIndexRoute =
   AuthenticatedAppHomeIndexRouteImport.update({
@@ -69,43 +73,23 @@ const AuthenticatedAppActivityLogsIndexRoute =
     path: '/activity-logs/',
     getParentRoute: () => AuthenticatedAppRoute,
   } as any)
-const AuthenticatedAppSettingsNotificationsIndexRoute =
-  AuthenticatedAppSettingsNotificationsIndexRouteImport.update({
-    id: '/settings/notifications/',
-    path: '/settings/notifications/',
-    getParentRoute: () => AuthenticatedAppRoute,
-  } as any)
-const AuthenticatedAppSettingsDisplayIndexRoute =
-  AuthenticatedAppSettingsDisplayIndexRouteImport.update({
-    id: '/settings/display/',
-    path: '/settings/display/',
-    getParentRoute: () => AuthenticatedAppRoute,
-  } as any)
-const AuthenticatedAppSettingsAppearanceIndexRoute =
-  AuthenticatedAppSettingsAppearanceIndexRouteImport.update({
-    id: '/settings/appearance/',
-    path: '/settings/appearance/',
-    getParentRoute: () => AuthenticatedAppRoute,
-  } as any)
 const AuthenticatedAppSettingsAccountIndexRoute =
   AuthenticatedAppSettingsAccountIndexRouteImport.update({
-    id: '/settings/account/',
-    path: '/settings/account/',
-    getParentRoute: () => AuthenticatedAppRoute,
+    id: '/account/',
+    path: '/account/',
+    getParentRoute: () => AuthenticatedAppSettingsRouteRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedAppIndexRoute
   '/auth/callback': typeof AuthCallbackRoute
+  '/settings': typeof AuthenticatedAppSettingsRouteRouteWithChildren
   '/auth/login/': typeof AuthLoginIndexRoute
   '/auth/register/': typeof AuthRegisterIndexRoute
   '/activity-logs/': typeof AuthenticatedAppActivityLogsIndexRoute
   '/home/': typeof AuthenticatedAppHomeIndexRoute
   '/settings/': typeof AuthenticatedAppSettingsIndexRoute
   '/settings/account/': typeof AuthenticatedAppSettingsAccountIndexRoute
-  '/settings/appearance/': typeof AuthenticatedAppSettingsAppearanceIndexRoute
-  '/settings/display/': typeof AuthenticatedAppSettingsDisplayIndexRoute
-  '/settings/notifications/': typeof AuthenticatedAppSettingsNotificationsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof AuthenticatedAppIndexRoute
@@ -116,15 +100,13 @@ export interface FileRoutesByTo {
   '/home': typeof AuthenticatedAppHomeIndexRoute
   '/settings': typeof AuthenticatedAppSettingsIndexRoute
   '/settings/account': typeof AuthenticatedAppSettingsAccountIndexRoute
-  '/settings/appearance': typeof AuthenticatedAppSettingsAppearanceIndexRoute
-  '/settings/display': typeof AuthenticatedAppSettingsDisplayIndexRoute
-  '/settings/notifications': typeof AuthenticatedAppSettingsNotificationsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/_authenticated/_app': typeof AuthenticatedAppRouteWithChildren
   '/auth/callback': typeof AuthCallbackRoute
+  '/_authenticated/_app/settings': typeof AuthenticatedAppSettingsRouteRouteWithChildren
   '/_authenticated/_app/': typeof AuthenticatedAppIndexRoute
   '/auth/login/': typeof AuthLoginIndexRoute
   '/auth/register/': typeof AuthRegisterIndexRoute
@@ -132,24 +114,19 @@ export interface FileRoutesById {
   '/_authenticated/_app/home/': typeof AuthenticatedAppHomeIndexRoute
   '/_authenticated/_app/settings/': typeof AuthenticatedAppSettingsIndexRoute
   '/_authenticated/_app/settings/account/': typeof AuthenticatedAppSettingsAccountIndexRoute
-  '/_authenticated/_app/settings/appearance/': typeof AuthenticatedAppSettingsAppearanceIndexRoute
-  '/_authenticated/_app/settings/display/': typeof AuthenticatedAppSettingsDisplayIndexRoute
-  '/_authenticated/_app/settings/notifications/': typeof AuthenticatedAppSettingsNotificationsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/auth/callback'
+    | '/settings'
     | '/auth/login/'
     | '/auth/register/'
     | '/activity-logs/'
     | '/home/'
     | '/settings/'
     | '/settings/account/'
-    | '/settings/appearance/'
-    | '/settings/display/'
-    | '/settings/notifications/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -160,14 +137,12 @@ export interface FileRouteTypes {
     | '/home'
     | '/settings'
     | '/settings/account'
-    | '/settings/appearance'
-    | '/settings/display'
-    | '/settings/notifications'
   id:
     | '__root__'
     | '/_authenticated'
     | '/_authenticated/_app'
     | '/auth/callback'
+    | '/_authenticated/_app/settings'
     | '/_authenticated/_app/'
     | '/auth/login/'
     | '/auth/register/'
@@ -175,9 +150,6 @@ export interface FileRouteTypes {
     | '/_authenticated/_app/home/'
     | '/_authenticated/_app/settings/'
     | '/_authenticated/_app/settings/account/'
-    | '/_authenticated/_app/settings/appearance/'
-    | '/_authenticated/_app/settings/display/'
-    | '/_authenticated/_app/settings/notifications/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -231,12 +203,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppIndexRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/_authenticated/_app/settings': {
+      id: '/_authenticated/_app/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AuthenticatedAppSettingsRouteRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
     '/_authenticated/_app/settings/': {
       id: '/_authenticated/_app/settings/'
-      path: '/settings'
+      path: '/'
       fullPath: '/settings/'
       preLoaderRoute: typeof AuthenticatedAppSettingsIndexRouteImport
-      parentRoute: typeof AuthenticatedAppRoute
+      parentRoute: typeof AuthenticatedAppSettingsRouteRoute
     }
     '/_authenticated/_app/home/': {
       id: '/_authenticated/_app/home/'
@@ -252,62 +231,47 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppActivityLogsIndexRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
-    '/_authenticated/_app/settings/notifications/': {
-      id: '/_authenticated/_app/settings/notifications/'
-      path: '/settings/notifications'
-      fullPath: '/settings/notifications/'
-      preLoaderRoute: typeof AuthenticatedAppSettingsNotificationsIndexRouteImport
-      parentRoute: typeof AuthenticatedAppRoute
-    }
-    '/_authenticated/_app/settings/display/': {
-      id: '/_authenticated/_app/settings/display/'
-      path: '/settings/display'
-      fullPath: '/settings/display/'
-      preLoaderRoute: typeof AuthenticatedAppSettingsDisplayIndexRouteImport
-      parentRoute: typeof AuthenticatedAppRoute
-    }
-    '/_authenticated/_app/settings/appearance/': {
-      id: '/_authenticated/_app/settings/appearance/'
-      path: '/settings/appearance'
-      fullPath: '/settings/appearance/'
-      preLoaderRoute: typeof AuthenticatedAppSettingsAppearanceIndexRouteImport
-      parentRoute: typeof AuthenticatedAppRoute
-    }
     '/_authenticated/_app/settings/account/': {
       id: '/_authenticated/_app/settings/account/'
-      path: '/settings/account'
+      path: '/account'
       fullPath: '/settings/account/'
       preLoaderRoute: typeof AuthenticatedAppSettingsAccountIndexRouteImport
-      parentRoute: typeof AuthenticatedAppRoute
+      parentRoute: typeof AuthenticatedAppSettingsRouteRoute
     }
   }
 }
 
+interface AuthenticatedAppSettingsRouteRouteChildren {
+  AuthenticatedAppSettingsIndexRoute: typeof AuthenticatedAppSettingsIndexRoute
+  AuthenticatedAppSettingsAccountIndexRoute: typeof AuthenticatedAppSettingsAccountIndexRoute
+}
+
+const AuthenticatedAppSettingsRouteRouteChildren: AuthenticatedAppSettingsRouteRouteChildren =
+  {
+    AuthenticatedAppSettingsIndexRoute: AuthenticatedAppSettingsIndexRoute,
+    AuthenticatedAppSettingsAccountIndexRoute:
+      AuthenticatedAppSettingsAccountIndexRoute,
+  }
+
+const AuthenticatedAppSettingsRouteRouteWithChildren =
+  AuthenticatedAppSettingsRouteRoute._addFileChildren(
+    AuthenticatedAppSettingsRouteRouteChildren,
+  )
+
 interface AuthenticatedAppRouteChildren {
+  AuthenticatedAppSettingsRouteRoute: typeof AuthenticatedAppSettingsRouteRouteWithChildren
   AuthenticatedAppIndexRoute: typeof AuthenticatedAppIndexRoute
   AuthenticatedAppActivityLogsIndexRoute: typeof AuthenticatedAppActivityLogsIndexRoute
   AuthenticatedAppHomeIndexRoute: typeof AuthenticatedAppHomeIndexRoute
-  AuthenticatedAppSettingsIndexRoute: typeof AuthenticatedAppSettingsIndexRoute
-  AuthenticatedAppSettingsAccountIndexRoute: typeof AuthenticatedAppSettingsAccountIndexRoute
-  AuthenticatedAppSettingsAppearanceIndexRoute: typeof AuthenticatedAppSettingsAppearanceIndexRoute
-  AuthenticatedAppSettingsDisplayIndexRoute: typeof AuthenticatedAppSettingsDisplayIndexRoute
-  AuthenticatedAppSettingsNotificationsIndexRoute: typeof AuthenticatedAppSettingsNotificationsIndexRoute
 }
 
 const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
+  AuthenticatedAppSettingsRouteRoute:
+    AuthenticatedAppSettingsRouteRouteWithChildren,
   AuthenticatedAppIndexRoute: AuthenticatedAppIndexRoute,
   AuthenticatedAppActivityLogsIndexRoute:
     AuthenticatedAppActivityLogsIndexRoute,
   AuthenticatedAppHomeIndexRoute: AuthenticatedAppHomeIndexRoute,
-  AuthenticatedAppSettingsIndexRoute: AuthenticatedAppSettingsIndexRoute,
-  AuthenticatedAppSettingsAccountIndexRoute:
-    AuthenticatedAppSettingsAccountIndexRoute,
-  AuthenticatedAppSettingsAppearanceIndexRoute:
-    AuthenticatedAppSettingsAppearanceIndexRoute,
-  AuthenticatedAppSettingsDisplayIndexRoute:
-    AuthenticatedAppSettingsDisplayIndexRoute,
-  AuthenticatedAppSettingsNotificationsIndexRoute:
-    AuthenticatedAppSettingsNotificationsIndexRoute,
 }
 
 const AuthenticatedAppRouteWithChildren =

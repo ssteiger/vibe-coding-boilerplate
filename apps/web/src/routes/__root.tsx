@@ -1,5 +1,4 @@
 import type { QueryClient } from '@tanstack/react-query'
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import {
   HeadContent,
   Outlet,
@@ -7,9 +6,9 @@ import {
   Scripts,
   createRootRouteWithContext,
 } from '@tanstack/react-router'
-import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
 
 import { type CurrentUser, getCurrentUser } from '~/lib/auth/server'
+import { BOOT_SCRIPT } from '~/lib/preferences'
 import appCss from '~/lib/styles/app.css?url'
 
 export const Route = createRootRouteWithContext<{
@@ -58,21 +57,9 @@ function RootDocument({ children }: { readonly children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        <ScriptOnce>
-          {`document.documentElement.classList.toggle(
-            'dark',
-            localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)
-            )`}
-        </ScriptOnce>
+        <ScriptOnce>{BOOT_SCRIPT}</ScriptOnce>
 
         {children}
-
-        {process.env.NODE_ENV === 'development' && (
-          <>
-            <ReactQueryDevtools buttonPosition="bottom-left" />
-            <TanStackRouterDevtools position="bottom-right" />
-          </>
-        )}
 
         <Scripts />
       </body>

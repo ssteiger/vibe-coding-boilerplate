@@ -1,5 +1,4 @@
 import {
-  ErrorComponent,
   type ErrorComponentProps,
   Link,
   rootRouteId,
@@ -7,8 +6,13 @@ import {
   useRouter,
 } from '@tanstack/react-router'
 import { Button } from '@vibe-coding-boilerplate/ui'
+import { TriangleAlertIcon } from 'lucide-react'
 
-export function DefaultCatchBoundary({ error }: Readonly<ErrorComponentProps>) {
+/**
+ * A page that fails to render. It says what went wrong in place of the page;
+ * the sidebar and the other pages still work.
+ */
+export function DefaultCatchBoundary({ error, reset }: Readonly<ErrorComponentProps>) {
   const router = useRouter()
   const isRoot = useMatch({
     strict: false,
@@ -16,19 +20,32 @@ export function DefaultCatchBoundary({ error }: Readonly<ErrorComponentProps>) {
   })
 
   console.error(error)
+  const message = error instanceof Error ? error.message : String(error)
 
   return (
-    <div className="flex min-w-0 flex-1 flex-col items-center justify-center gap-6 p-4">
-      <ErrorComponent error={error} />
+    <div className="flex min-w-0 flex-1 flex-col items-center justify-center gap-5 p-6">
+      <div className="flex max-w-xl flex-col items-center gap-2 text-center">
+        <TriangleAlertIcon className="size-6 text-destructive" />
+        <h1 className="text-xl font-medium">This page could not be shown</h1>
+        <p className="text-muted-foreground">
+          {isRoot
+            ? 'The app hit an error before it could start.'
+            : 'Something went wrong while showing this page. The other pages still work.'}
+        </p>
+      </div>
+      <pre className="max-h-48 w-full max-w-xl overflow-auto whitespace-pre-wrap rounded-md bg-muted p-3 text-xs">
+        {message}
+      </pre>
       <div className="flex flex-wrap items-center gap-2">
         <Button
           size="sm"
           type="button"
           onClick={() => {
-            router.invalidate()
+            reset()
+            void router.invalidate()
           }}
         >
-          Try Again
+          Try again
         </Button>
         {isRoot ? (
           <Button asChild variant="secondary" size="sm">
@@ -43,7 +60,7 @@ export function DefaultCatchBoundary({ error }: Readonly<ErrorComponentProps>) {
                 window.history.back()
               }}
             >
-              Go Back
+              Go back
             </Link>
           </Button>
         )}

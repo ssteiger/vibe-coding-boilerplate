@@ -1,8 +1,8 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { AuthLayout } from '@vibe-coding-boilerplate/ui'
 
-import { AuthLogo } from '../-components/auth-logo'
-import { UserAuthFormRegister } from './-components/user-auth-form'
+import { AuthLogo } from '../-components/AuthLogo'
+import { UserAuthFormRegister } from './-components/UserAuthForm'
 
 const RegisterPage = () => {
   return (
@@ -35,7 +35,7 @@ const RegisterPage = () => {
       }
     >
       <div className="mb-8 space-y-2">
-        <h1 className="text-2xl font-semibold tracking-tight">Create account</h1>
+        <h1 className="text-2xl font-medium">Create account</h1>
         <p className="text-muted-foreground text-sm">Enter your details to get started.</p>
       </div>
 

@@ -5,6 +5,16 @@
 		"reset": "supabase db reset || supabase start",
 		"test": "supabase db test",
 		"lint": "supabase db lint",
-		"deploy": "supabase link --project-ref $SUPABASE_PROJECT_REF && supabase db push"
+		"deploy": "supabase link --project-ref $SUPABASE_PROJECT_REF && supabase db push",
+		"emails:build": "bun emails/build.tsx",
+		"typecheck": "tsc --noEmit"
+	},
+	"devDependencies": {
+		"@react-email/components": "^1.0.12",
+		"@types/bun": "^1.4.2",
+		"@types/react": "^19.1.0",
+		"typescript": "^5.8.2",
+		"react": "^19.1.0",
+		"react-dom": "^19.1.0"
 	}
 }

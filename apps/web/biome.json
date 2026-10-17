@@ -7,6 +7,8 @@
       ".vscode",
       "node_modules",
       "next-env.d",
+      ".nitro",
+      ".output",
       "src/routeTree.gen.ts",
       "src/lib/styles/app.css"
     ]

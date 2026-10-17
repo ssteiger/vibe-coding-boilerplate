@@ -1,18 +1,18 @@
-export { AppLayout, type AppLayoutProps } from './app-layout'
-export { AuthLayout, type AuthLayoutProps, type AuthLayoutQuote } from './auth-layout'
+export { APP_SCROLL_ID, AppLayout, type AppLayoutProps } from './AppLayout'
+export { AuthLayout, type AuthLayoutProps, type AuthLayoutQuote } from './AuthLayout'
 export {
   AppSidebar,
   type AppSidebarProps,
   type AppSidebarNavItem,
   type AppSidebarDocumentItem,
-} from './app-sidebar'
-export { SiteHeader, type SiteHeaderProps } from './site-header'
-export { NavMain } from './nav-main'
-export { NavSecondary } from './nav-secondary'
-export { NavDocuments } from './nav-documents'
+} from './AppSidebar'
+export { SiteHeader, type SiteHeaderProps } from './SiteHeader'
+export { NavMain } from './NavMain'
+export { NavSecondary } from './NavSecondary'
+export { NavDocuments } from './NavDocuments'
 export {
   NavUser,
   type NavUserProps,
   type NavUserUser,
   type NavUserMenuItem,
-} from './nav-user'
+} from './NavUser'

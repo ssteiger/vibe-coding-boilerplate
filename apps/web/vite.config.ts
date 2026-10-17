@@ -9,6 +9,13 @@ export default defineConfig({
   server: {
     port: 3000,
   },
+  /* The Cursor SDK is Node-only and ships lazy chunks esbuild cannot pre-bundle. */
+  optimizeDeps: {
+    exclude: ['@cursor/sdk'],
+  },
+  ssr: {
+    external: ['@cursor/sdk'],
+  },
   plugins: [
     tsConfigPaths({
       projects: ['./tsconfig.json'],

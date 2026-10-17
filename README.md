@@ -14,7 +14,7 @@ The opinionated bet: small full-stack features are easier to read, change, and l
 | DB access | **Drizzle ORM** (`postgres-js`) | Schema is hand-authored TypeScript → tables, columns, and query results are all typed end-to-end with zero codegen step. |
 | Database + auth | **Supabase** (CLI for local dev) | One container brings up Postgres, GoTrue auth, Storage, Realtime, and Studio. Auth is consumed through `@supabase/ssr` so it works inside server functions. |
 | Client state / caching | **TanStack Query** | Powers the `['user']` cache in `__root.tsx` and the auto-refreshing `['logs']` query in `activity-logs/`. |
-| UI | **shadcn/ui** + Tailwind v4 + lucide-react + sonner | Owned source code (vendored into `apps/web/src/lib/components/ui/`), no runtime UI dependency. |
+| UI | **shadcn/ui** + Tailwind v4 + lucide-react + sonner | Owned source code in `packages/ui` (imported as `@vibe-coding-boilerplate/ui`), no runtime UI dependency. |
 | Monorepo | **Bun workspaces** + **Turborepo** | Fast installs, cached typecheck/lint, parallel `dev`. |
 | Lint / format | **Biome** + **ESLint** | Biome is the fast default; ESLint adds React-specific plugins (react-compiler, eslint-react, query, router). |
 
@@ -31,7 +31,22 @@ The two opinions that drive the rest of the design:
 vibe-coding-boilerplate/
 ├── apps/
 │   ├── web/         TanStack Start app (the "vibe" surface).
-│   │                Routes, shadcn UI, auth, server functions.
+│   │   └── src/
+│   │       ├── routes/     File routes; `-components/` folders are
+│   │       │               route-private.
+│   │       └── lib/
+│   │           ├── components/    App-wide components: PageChrome
+│   │           │                  (PageHeader, EmptyState, StatCard,
+│   │           │                  SectionBoundary), GlobalSearch,
+│   │           │                  error and loading pages.
+│   │           ├── assistant/     The header assistant (⌘J).
+│   │           ├── ai/            The optional language model client.
+│   │           ├── search/        The pages the header search (⌘K) finds.
+│   │           ├── auth/          Auth server functions.
+│   │           ├── styles/        app.css (fonts, type scale) and
+│   │           │                  typeset.css (long-form content).
+│   │           └── preferences.ts Theme, text size and motion, kept in
+│   │                              localStorage and applied before paint.
 │   ├── my-app/      Standalone tsx script. Demonstrates how to
 │   │                reuse the Drizzle package from a non-web
 │   │                entrypoint (e.g. background worker, cron).
@@ -41,12 +56,38 @@ vibe-coding-boilerplate/
 │   ├── db-drizzle/      Drizzle schema, drizzle-kit config, and
 │   │                    the `postgres_db` client. Imported by both
 │   │                    apps as `@vibe-coding-boilerplate/db-drizzle`.
+│   ├── ui/              shadcn/ui components (one PascalCase file
+│   │                    each), the app layout, and theme.css.
 │   ├── tsconfig/        Shared `base.json` + `react.json` tsconfigs.
 │   │                    Apps extend these via relative path.
 │   └── biome-config/    Shared Biome rules. Apps extend via relative
 │                        path so all packages format identically.
+├── .claude/             The impeccable design skill and its agents.
+├── PRODUCT.md           The product brief the design skill reads.
 └── turbo.json, package.json, bun.lock
 ```
+
+### Design
+
+- **Theme:** [packages/ui/src/styles/theme.css](packages/ui/src/styles/theme.css) holds the palette: cool near-white and near-black greys with one indigo `--brand` accent for "you are here" places (the active page, checked controls, the caret). Hairline borders separate surfaces rather than shadows. Both themes are first-class.
+- **Type:** [apps/web/src/lib/styles/app.css](apps/web/src/lib/styles/app.css) self-hosts Inter (variable, with optical sizes) for the interface and Geist Mono for code, on a dense scale: 15px for reading, 13px for interface text.
+- **Preferences:** theme, text size and motion are set on Settings → General and applied to `<html>` before the first paint, so nothing flashes.
+- **Pages:** start a page with `PageHeader`, show empty data with `EmptyState`, and wrap a part that may fail in `SectionBoundary`, all from [PageChrome.tsx](apps/web/src/lib/components/PageChrome.tsx).
+
+The impeccable skill in `.claude/skills/impeccable` gives coding agents a design playbook (shape, critique, audit, polish, and more). It reads [PRODUCT.md](PRODUCT.md) first, so fill that in for your product. Its launcher downloads its binary on first run.
+
+### Optional language model
+
+The assistant in the header (⌘J) answers with a language model when one is configured in `apps/web/.env`; without one, it says how to turn it on.
+
+| Variable | Meaning |
+| --- | --- |
+| `AI_PROVIDER` | `openai`, `anthropic` or `cursor` |
+| `AI_API_KEY` | The provider's API key. For `cursor`, a key from cursor.com/dashboard → Integrations (`CURSOR_API_KEY` works too). |
+| `AI_MODEL` | Optional. Defaults to `gpt-4o-mini`, `claude-3-5-haiku-latest` or `composer-2.5`. |
+| `AI_BASE_URL` | Optional. An OpenAI-compatible local server such as Ollama (`http://127.0.0.1:11434/v1`) or LM Studio. |
+
+Tell it about your app in `appContext` in [apps/web/src/lib/assistant/server.ts](apps/web/src/lib/assistant/server.ts), and call `complete` from [apps/web/src/lib/ai/model.ts](apps/web/src/lib/ai/model.ts) anywhere else on the server that wants a model.
 
 ### The "one-file feature" pattern
 
@@ -55,6 +96,7 @@ Open [apps/web/src/routes/\_authenticated/\_app/activity-logs/index.tsx](apps/we
 ```tsx
 // 1. A server function that talks directly to Postgres via Drizzle.
 const fetchLogs = createServerFn({ method: 'GET' }).handler(async () => {
+  await requireSignedInUser()
   return postgres_db
     .select()
     .from(schema.logs)
@@ -148,11 +190,11 @@ Useful local URLs while `dev:db` is running:
 | Service | URL |
 | --- | --- |
 | Web app | <http://127.0.0.1:3000> |
-| Supabase Studio (DB UI) | <http://127.0.0.1:54423/project/default> |
-| Supabase API | <http://127.0.0.1:54421> |
-| Inbucket (catches outgoing emails, including magic-link OTPs) | <http://127.0.0.1:54424> |
+| Supabase Studio (DB UI) | <http://127.0.0.1:54623/project/default> |
+| Supabase API | <http://127.0.0.1:54621> |
+| Inbucket (catches outgoing emails, including magic-link OTPs) | <http://127.0.0.1:54624> |
 
-> The Supabase ports are defined in [apps/supabase/config.toml](apps/supabase/config.toml) (`54421` API, `54422` DB, `54423` Studio, `54424` Inbucket). If you have an older local `.env` referencing `543xx` ports, refresh it from the corresponding `.env.example`.
+> The Supabase ports are defined in [apps/supabase/config.toml](apps/supabase/config.toml) (`54621` API, `54622` DB, `54623` Studio, `54624` Inbucket). If you have an older local `.env` referencing `543xx` ports, refresh it from the corresponding `.env.example`.
 
 ### Checks
 
@@ -162,7 +204,7 @@ bun run lint          # biome check on every workspace
 bun run format        # biome format --write on every workspace
 ```
 
-ESLint also runs on `apps/web` if you call it directly (`cd apps/web && bunx eslint src`); the shadcn-vendored components under `apps/web/src/lib/components/ui/` are intentionally ignored by both Biome and ESLint.
+ESLint also runs on `apps/web` if you call it directly (`cd apps/web && bunx eslint src`).
 
 ---
 
@@ -171,8 +213,9 @@ ESLint also runs on `apps/web` if you call it directly (`cd apps/web && bunx esl
 ### Adding a screen + query
 
 1. Create the file route under `apps/web/src/routes/...` (TanStack Router file conventions: `index.tsx`, `_authenticated.tsx` for layout segments, `-components/` for route-private components).
-2. In the same file, define a `createServerFn({ method: 'GET' }).handler(async () => …)` that uses `postgres_db` + `schema.*` from `@vibe-coding-boilerplate/db-drizzle`.
+2. In the same file, define a `createServerFn({ method: 'GET' }).handler(async () => …)` that calls `requireSignedInUser()` and then uses `postgres_db` + `schema.*` from `@vibe-coding-boilerplate/db-drizzle`.
 3. Call it from `useQuery` (or `useMutation` for writes). Errors thrown server-side surface in React Query's `error`.
+4. Add the page to the sidebar in [\_app.tsx](apps/web/src/routes/_authenticated/_app.tsx) and to `PAGES` in [lib/search/model.ts](apps/web/src/lib/search/model.ts) so the header search finds it.
 
 ### Adding a table
 
@@ -186,11 +229,23 @@ If you ever get stuck because a local migration was applied with stale content, 
 ### Adding a shadcn component
 
 ```bash
-cd apps/web
-bun run ui add <component-name>
+cd packages/ui
+bunx shadcn@latest add <component-name>
 ```
 
-It writes into `apps/web/src/lib/components/ui/` and is automatically excluded from lint.
+It writes into `packages/ui/src/components/ui/`. Rename the file to PascalCase (`toggle-group.tsx` → `ToggleGroup.tsx`) and export it from [packages/ui/src/components/ui/index.ts](packages/ui/src/components/ui/index.ts).
+
+### Editing the sign-in and sign-up emails
+
+The emails are React Email components in [apps/supabase/emails/](apps/supabase/emails): `MagicLink.tsx` (sign-in) and `Confirmation.tsx` (sign-up), sharing `EmailLayout` and `styles.ts`. Supabase only sends static HTML, so render them after a change and restart the stack:
+
+```bash
+cd apps/supabase
+bun run emails:build    # writes templates/magic-link.html and templates/confirmation.html
+npx supabase stop && npx supabase start
+```
+
+Supabase's `{{ .Token }}` and `{{ .ConfirmationURL }}` placeholders pass through the render unchanged. Subjects live in [apps/supabase/config.toml](apps/supabase/config.toml).
 
 ### Adding a new app or package
 

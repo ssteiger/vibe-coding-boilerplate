@@ -28,3 +28,16 @@ export function getSupabaseServerClient() {
     },
   })
 }
+
+/**
+ * The signed-in user, for server functions that act on their behalf. Throws
+ * `message` otherwise; the page shows it as the error, so each caller says
+ * what signing in is needed for.
+ */
+export async function requireSignedInUser(message = 'You must be signed in') {
+  const {
+    data: { user },
+  } = await getSupabaseServerClient().auth.getUser()
+  if (!user) throw new Error(message)
+  return user
+}
