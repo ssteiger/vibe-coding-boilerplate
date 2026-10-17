@@ -1,3 +1,4 @@
+import { Link } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
 
 import { Separator } from '../ui/Separator'
@@ -5,6 +6,10 @@ import { SidebarTrigger } from '../ui/Sidebar'
 import { ThemeToggle } from '../ui/ThemeToggle'
 
 export interface SiteHeaderProps {
+  /** Brand label at the left of the header. */
+  brand?: ReactNode
+  /** URL the brand link navigates to. */
+  brandHref?: string
   /** Title rendered next to the sidebar trigger. */
   title?: ReactNode
   /** Optional content rendered between title and the right-side actions. */
@@ -20,6 +25,8 @@ export interface SiteHeaderProps {
 }
 
 export function SiteHeader({
+  brand = 'Boilerplate',
+  brandHref = '/',
   title,
   children,
   center,
@@ -30,6 +37,13 @@ export function SiteHeader({
   return (
     <header className="group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 relative flex h-12 shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear">
       <div className="flex w-full items-center gap-1 px-4 lg:gap-2 lg:px-6">
+        {/* As wide as the sidebar below, less the header's left padding, so the trigger lines up with the content. */}
+        <Link
+          to={brandHref}
+          className="mr-2 shrink-0 truncate text-base font-semibold md:mr-0 md:w-[calc(var(--sidebar-width)-1rem)] lg:w-[calc(var(--sidebar-width)-1.5rem)]"
+        >
+          {brand}
+        </Link>
         <SidebarTrigger className="-ml-1" />
         <Separator orientation="vertical" className="mx-2 data-[orientation=vertical]:h-4" />
         {title ? <h1 className="text-sm font-medium">{title}</h1> : null}

@@ -1,4 +1,3 @@
-import { Link } from '@tanstack/react-router'
 import {
   ClipboardListIcon,
   DatabaseIcon,
@@ -9,17 +8,9 @@ import {
   SearchIcon,
   SettingsIcon,
 } from 'lucide-react'
-import type { ComponentProps, ReactNode } from 'react'
+import type { ComponentProps } from 'react'
 
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-} from '../ui/Sidebar'
+import { Sidebar, SidebarContent, SidebarFooter } from '../ui/Sidebar'
 import { NavDocuments } from './NavDocuments'
 import { NavMain } from './NavMain'
 import { NavSecondary } from './NavSecondary'
@@ -40,10 +31,6 @@ export interface AppSidebarDocumentItem {
 }
 
 export interface AppSidebarProps extends ComponentProps<typeof Sidebar> {
-  /** Brand label rendered in the sidebar header. */
-  brand?: ReactNode
-  /** URL the brand link navigates to. */
-  brandHref?: string
   navMain?: AppSidebarNavItem[]
   navSecondary?: AppSidebarNavItem[]
   documents?: AppSidebarDocumentItem[]
@@ -71,8 +58,6 @@ const defaultDocuments: AppSidebarDocumentItem[] = [
 
 export function AppSidebar({
   variant = 'inset',
-  brand = 'Boilerplate',
-  brandHref = '/',
   navMain = defaultNavMain,
   navSecondary = defaultNavSecondary,
   documents = defaultDocuments,
@@ -83,17 +68,6 @@ export function AppSidebar({
 }: AppSidebarProps) {
   return (
     <Sidebar variant={variant} {...props}>
-      <SidebarHeader>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild className="data-[slot=sidebar-menu-button]:!p-1.5">
-              <Link to={brandHref}>
-                <span className="text-base font-semibold">{brand}</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarHeader>
       <SidebarContent>
         {navMain.length > 0 ? <NavMain items={navMain} /> : null}
         {documents.length > 0 ? <NavDocuments items={documents} /> : null}

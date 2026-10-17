@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 
+import { cn } from '../../utils/cn'
 import { SidebarInset, SidebarProvider } from '../ui/Sidebar'
 import { Toaster } from '../ui/Sonner'
 import { AppSidebar, type AppSidebarProps } from './AppSidebar'
@@ -57,19 +58,28 @@ export function AppLayout({
   defaultSidebarOpen,
 }: AppLayoutProps) {
   return (
-    <SidebarProvider defaultOpen={defaultSidebarOpen}>
+    <SidebarProvider defaultOpen={defaultSidebarOpen} className="h-svh flex-col">
       {hideToaster ? null : <Toaster position={toasterPosition} />}
-      {sidebar ?? <AppSidebar variant="inset" {...sidebarProps} />}
-      <SidebarInset className="h-svh">
-        {hideHeader ? null : (header ?? <SiteHeader {...headerProps} />)}
-        <div
-          id={APP_SCROLL_ID}
-          data-scroll-restoration-id={APP_SCROLL_ID}
-          className="flex min-h-0 flex-1 flex-col overflow-y-auto"
-        >
-          <div className="@container/main flex min-h-0 flex-1 flex-col gap-2">{children}</div>
-        </div>
-      </SidebarInset>
+      {hideHeader ? null : (header ?? <SiteHeader {...headerProps} />)}
+      <div className="flex min-h-0 w-full flex-1">
+        {sidebar ?? (
+          <AppSidebar
+            variant="inset"
+            {...sidebarProps}
+            // The sidebar is fixed to the viewport; start it below the full-width header.
+            className={cn(!hideHeader && 'top-12 h-[calc(100svh-3rem)]', sidebarProps?.className)}
+          />
+        )}
+        <SidebarInset className="min-h-0">
+          <div
+            id={APP_SCROLL_ID}
+            data-scroll-restoration-id={APP_SCROLL_ID}
+            className="flex min-h-0 flex-1 flex-col overflow-y-auto"
+          >
+            <div className="@container/main flex min-h-0 flex-1 flex-col gap-2">{children}</div>
+          </div>
+        </SidebarInset>
+      </div>
     </SidebarProvider>
   )
 }
