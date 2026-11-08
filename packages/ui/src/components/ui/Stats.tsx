@@ -77,7 +77,7 @@ function StatTitle({
       data-slot="stat-title"
       className={cn(
         'w-fit text-sm text-muted-foreground',
-        tooltip && 'cursor-default underline decoration-dotted underline-offset-4',
+        tooltip && 'cursor-default',
         className,
       )}
       {...props}
